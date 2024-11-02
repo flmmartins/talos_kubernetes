@@ -48,9 +48,6 @@ cluster:
                     enforce-version: latest
                     warn: restricted
                     warn-version: latest
-                exemptions:
-                    namespaces:
-                        - kube-system
                     runtimeClasses: []
                     usernames: []
                 kind: PodSecurityConfiguration

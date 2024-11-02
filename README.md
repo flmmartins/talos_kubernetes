@@ -7,12 +7,14 @@ This repository configure kubernetes cluster by using Talos. Each folder in this
 
 ## Install talos cli
 
+```
 brew install talosctl
 brew install siderolabs/tap/talosctl
+```
 
 ## Download and install talosconfig
 
-Download:
+Download talosconfig from vault and run:
 
 ```
 talosctl kubeconfig --nodes <IP> --endpoints <IP> --talosconfig=./talosconfig
@@ -31,12 +33,37 @@ Test again using the talos config from your local folder:
 talosctl -n <IP> health
 ```
 
-# Visualize cluster/node information:
+# Useful debugging commands
+
+Health checks:
+```
+talosctl -n <IP> health
+talosctl -n <IP> dashboard
+```
+
+Talos OS service state:
+```
+talosctl -n <IP> services
+```
+
+Logs for a service:
 
 ```
-talosctl --nodes <IP> --endpoints <IP> health
-talosctl --nodes <IP> --endpoints <IP> dashboard
+talosctl -n <IP> logs <service>
 ```
+
+Check system containers:
+
+```
+talosctl -n <IP> containers -k
+```
+
+Logs of system containers (you must select the second one from the above output)
+
+````
+talosctl -n <IP> logs -k kube-system/....
+````
+
 
 # Get current configuration
 
@@ -66,7 +93,7 @@ talosctl gen config \
 --with-docs=false \
 --with-examples=false \
 <cluster_name> https://<IP>:6443 \
---t <type_of_change>
+--t <type_of_change> \
 --config-patch @controlplane-base.yaml 
 ```
 
