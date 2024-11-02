@@ -113,6 +113,57 @@ talosctl apply-config -n <IP> --file controlplane.yaml
 There's also a mode flag which allows you to say if node can restart or not
 
 
+# Add new nodes
+
+## Worker nodes
+
+Generate config file:
+
+```
+talosctl gen config \
+--with-secrets secrets.yaml \
+--with-docs=false \
+--with-examples=false \
+<cluster_name> https://<IP>:6443 \
+--t worker \
+--config-patch @worker-base.yaml 
+```
+
+Apply first time with insecure flag:
+
+```
+talosctl apply-config --insecure -n <new-node-ip> --file worker.yaml
+```
+
+## Control Plane nodes
+
+TODO: Didn't do it yet
+
+```
+talosctl gen config \
+--with-secrets secrets.yaml \
+--with-docs=false \
+--with-examples=false \
+<cluster_name> https://<IP>:6443 \
+--t controlplane \
+--config-patch @controlplane-base.yaml 
+```
+
+Update talosconfig with new endpoint
+
+```
+talosctl config endpoint <IP>
+talosctl config merge ./talosconfig
+```
+
+Test by listing endpoints and seeing the new ip:
+
+```
+talosctl get endpoints -n <IP>
+```
+
+Upload new talosconfig to vault
+
 # Generating vanila configuration without changes
 
 When you create a talos cluster you generate several files with `talosctl gen config` and then you apply them to nodes. If you need to re-generate this same files without changes:
