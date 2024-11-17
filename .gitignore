@@ -1,3 +1,4 @@
+**/.DS_Store
 **/controlplane.yaml
 **/secrets.yaml
 **/worker.yaml

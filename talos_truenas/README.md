@@ -5,13 +5,8 @@
 
 ## Storage
 
-Storage configuration should be applied after cluster has been installed with Talos. We are configuring NFS so cluster can access datasets in Truenas
+NFS share was greated in Truenas and storage was configure to use it.
 
-Create a dataset in truenas and instal CSI:
+## Other components
 
-```
-helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
-helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --version v4.9.0
-```
-
-The usage of the storage is done via storage-class and each app will have it's own.
+For storage and other components you can check them in [here](https://github.com/flmmartins/kubernetes/tree/main)
