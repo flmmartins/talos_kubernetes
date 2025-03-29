@@ -139,7 +139,17 @@ It might be that one pod will get stuck during the node drain prologing the upgr
 
 Check health afterwards: `talosctl -n CONTROL_PLANE_IP health`
 
-After upgrade make sure to update base config and generate a new worker/controlplane config
+After upgrade make sure to update base config and generate a new worker/controlplane config:
+
+```
+talosctl gen config \
+--with-secrets secrets.yaml \
+--with-docs=false \
+--with-examples=false \
+talos_truenas https://CONTROL_PLANE_IP:6443
+```
+
+Compare controlplane.yaml, worker.yaml, talosconfig files against base to see if something changed. Versions are expected to change and those should be updated at least. On talosconfig it was observed that certificate changed so you can do `talosctl config merge ./talosconfig`
 
 # Upgrade Kubernetes
 
@@ -162,6 +172,18 @@ Note that the --nodes parameter specifies the control plane node to send the API
 To check what will be upgraded you can run talosctl upgrade-k8s with the --dry-run flag.
 
 Check health afterwards: `talosctl -n CONTROL_PLANE_IP health`
+
+After upgrade make sure to update base config and generate a new worker/controlplane config:
+
+```
+talosctl gen config \
+--with-secrets secrets.yaml \
+--with-docs=false \
+--with-examples=false \
+talos_truenas https://CONTROL_PLANE_IP:6443
+```
+
+Compare controlplane.yaml, worker.yaml, talosconfig files against base to see if something changed. Versions are expected to change and those should be updated at least. On talosconfig it was observed that certificate changed so you can do `talosctl config merge ./talosconfig`
 
 # Add new nodes
 
