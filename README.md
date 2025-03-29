@@ -82,7 +82,7 @@ When you create a talos cluster you generate several files with `talosctl gen co
 
 Secrets.yaml should be downloaded to your laptop and talosconfig should installed in your laptop as well as mentioned above.
 
-You can change a cluster in many ways but the best way for me is to change a file and apply that file to the nodes that way you always force yourself to do code changes and maintain a "state" file of your node. Therefore I created workers-base.yaml and controlplane-base.yaml files with non sensitive information. 
+You can change a cluster in many ways but the best way for me is to change a file and apply that file to the nodes that way you always force yourself to do code changes and maintain a "state" file of your node. Therefore I created **workers-base.yaml** and **controlplane-base.yaml** files with non sensitive information. 
 
 Edit these base file with your changes, save and run:
 
@@ -112,41 +112,31 @@ talosctl apply-config -n <IP> --file controlplane.yaml
 
 There's also a mode flag which allows you to say if node can restart or not
 
-
 # Add new nodes
 
-## Worker nodes
+Install talos ISO in one machine. Once you boot you will be able to configure IPs. More info on Notion
 
-Generate config file:
+More info can be found on [scale-up](https://www.talos.dev/v1.9/talos-guides/howto/scaling-up/)
 
-```
-talosctl gen config \
---with-secrets secrets.yaml \
---with-docs=false \
---with-examples=false \
-<cluster_name> https://<IP>:6443 \
---t worker \
---config-patch @worker-base.yaml 
-```
 
-Apply first time with insecure flag:
+If you already have the config in your machine it's just a matter of applying it to the new IP depending of a machine is controlplane or worker. If you don't have the config files ready, check the change configuration section. It will generate a file based on the worker-base or controlplane-base.
+
+## Workers
 
 ```
 talosctl apply-config --insecure -n <new-node-ip> --file worker.yaml
 ```
 
-## Control Plane nodes
-
-TODO: Didn't do it yet
+To apply labels, instead of generating a config file only for that you can do:
 
 ```
-talosctl gen config \
---with-secrets secrets.yaml \
---with-docs=false \
---with-examples=false \
-<cluster_name> https://<IP>:6443 \
---t controlplane \
---config-patch @controlplane-base.yaml 
+talosctl patch mc --nodes <node_ip> --patch '[{"op": "add", "path": "/machine/nodeLabels", "value": {"env":"prd","number":"1"}}]'
+```
+
+**Control Plane**
+
+```
+talosctl apply-config --insecure -n <new-node-ip> --file controlplane.yaml
 ```
 
 Update talosconfig with new endpoint
