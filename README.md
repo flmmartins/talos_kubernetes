@@ -33,6 +33,12 @@ Test again using the talos config from your local folder:
 talosctl -n <IP> health
 ```
 
+You can add nodes to the config file so you don't have to always keep doing -n. You can do this by:
+
+```
+talosctl config node IP1 IP2
+```
+
 # Useful debugging commands
 
 Health checks:
@@ -92,7 +98,7 @@ talosctl gen config \
 --with-secrets secrets.yaml \
 --with-docs=false \
 --with-examples=false \
-<cluster_name> https://<IP>:6443 \
+<cluster_name> https://CONTROL_PLANE_IP:6443 \
 --t <type_of_change> \
 --config-patch @controlplane-base.yaml 
 ```
@@ -111,6 +117,51 @@ talosctl apply-config -n <IP> --file controlplane.yaml
 ```
 
 There's also a mode flag which allows you to say if node can restart or not
+
+# Upgrades
+
+Talos will control upgrades. It recommends going from latest patch of the current version and then switching major/minor.
+
+## Talos OS
+Upgrading OS will not change Kubernetes Version
+
+Before upgrading Kubernetes upgrade talosctl on your laptop. It will allow you to go to the latest version of kubernetes available.
+
+```
+brew upgrade talosctl
+```
+
+```
+talosctl upgrade --nodes NODE_IP --image ghcr.io/siderolabs/installer:v1.9.5
+```
+
+It might be that one pod will get stuck during the node drain prologing the upgrade, you can enter and check.
+
+Check health afterwards: `talosctl -n CONTROL_PLANE_IP health`
+
+After upgrade make sure to update base config and generate a new worker/controlplane config
+
+# Upgrade Kubernetes
+
+Check Talos and Kubernetes version compatibility.
+
+Before upgrading Kubernetes upgrade talosctl on your laptop:
+
+```
+brew upgrade talosctl
+```
+
+To trigger a Kubernetes upgrade, issue a command specifying the version of Kubernetes to ugprade to, such as:
+
+```
+talosctl --nodes <controlplane node> upgrade-k8s --to 1.32.2
+```
+
+Note that the --nodes parameter specifies the control plane node to send the API call to, but all members of the cluster will be upgraded.
+
+To check what will be upgraded you can run talosctl upgrade-k8s with the --dry-run flag.
+
+Check health afterwards: `talosctl -n CONTROL_PLANE_IP health`
 
 # Add new nodes
 
@@ -133,7 +184,7 @@ To apply labels, instead of generating a config file only for that you can do:
 talosctl patch mc --nodes <node_ip> --patch '[{"op": "add", "path": "/machine/nodeLabels", "value": {"env":"prd","number":"1"}}]'
 ```
 
-**Control Plane**
+## Control Plane
 
 ```
 talosctl apply-config --insecure -n <new-node-ip> --file controlplane.yaml
@@ -146,6 +197,8 @@ talosctl config endpoint <IP>
 talosctl config merge ./talosconfig
 ```
 
+The merge command can mess up the talos config file so it's best to just add endpoints manually to the file if that's the case.
+
 Test by listing endpoints and seeing the new ip:
 
 ```
@@ -153,6 +206,15 @@ talosctl get endpoints -n <IP>
 ```
 
 Upload new talosconfig to vault
+
+## Adding a node as controlplane and worker
+
+When adding a second controlplane performance was horrible. Reading talos documentation: they require an odd number of controlplanes so I had to add a node as controlplane and worker in order to have an odd number.
+
+# Deleting a node
+
+`talosctl -n IP.of.node.to.remove reset`
+`kubectl delete node`
 
 # Generating vanila configuration without changes
 

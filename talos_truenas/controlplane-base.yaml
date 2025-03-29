@@ -5,7 +5,7 @@ machine:
     type: controlplane
     certSANs: []
     kubelet:
-        image: ghcr.io/siderolabs/kubelet:v1.31.2
+        image: ghcr.io/siderolabs/kubelet:v1.32.3
         defaultRuntimeSeccompProfileEnabled: true
         disableManifestsDirectory: true
     network: {}
@@ -35,7 +35,7 @@ cluster:
         serviceSubnets:
             - 10.96.0.0/12
     apiServer:
-        image: registry.k8s.io/kube-apiserver:v1.31.2
+        image: registry.k8s.io/kube-apiserver:v1.32.3
         disablePodSecurityPolicy: true
         admissionControl:
             - name: PodSecurity
@@ -57,11 +57,11 @@ cluster:
             rules:
                 - level: Metadata
     controllerManager:
-        image: registry.k8s.io/kube-controller-manager:v1.31.2
+        image: registry.k8s.io/kube-controller-manager:v1.32.3
     proxy:
-        image: registry.k8s.io/kube-proxy:v1.31.2
+        image: registry.k8s.io/kube-proxy:v1.32.3
     scheduler:
-        image: registry.k8s.io/kube-scheduler:v1.31.2
+        image: registry.k8s.io/kube-scheduler:v1.32.3
     discovery:
         enabled: true
         registries:
