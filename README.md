@@ -90,9 +90,18 @@ Secrets.yaml should be downloaded to your laptop and talosconfig should installe
 
 You can change a cluster in many ways but the best way for me is to change a file and apply that file to the nodes that way you always force yourself to do code changes and maintain a "state" file of your node. Therefore I created **workers-base.yaml** and **controlplane-base.yaml** files with non sensitive information. 
 
-Edit these base file with your changes, save and run:
+Edit these base file with your changes. Now backup your old configuration with:
 
+```
+talosctl gen config \
+--with-secrets secrets.yaml \
+--with-docs=false \
+--with-examples=false \
+<cluster_name> https://CONTROL_PLANE_IP:6443 \
+--t <type_of_change> > backup.yaml 
+```
 
+Now generate new config with your changes:
 ```
 talosctl gen config \
 --with-secrets secrets.yaml \
@@ -117,6 +126,8 @@ talosctl apply-config -n <IP> --file controlplane.yaml
 ```
 
 There's also a mode flag which allows you to say if node can restart or not
+
+**Important:** Gen config command is not perfect. Sometimes after running it you will see duplicated entries and that will be bad for your cluster.
 
 # Upgrades
 
@@ -232,6 +243,11 @@ Upload new talosconfig to vault
 ## Adding a node as controlplane and worker
 
 When adding a second controlplane performance was horrible. Reading talos documentation: they require an odd number of controlplanes so I had to add a node as controlplane and worker in order to have an odd number.
+
+```
+cluster:
+  allowSchedulingOnControlPlanes: true
+```
 
 # Deleting a node
 
