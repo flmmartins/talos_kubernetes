@@ -324,6 +324,31 @@ Test again:
 talosctl -n <IP> health
 ```
 
+# Changing Talos Endpoint & Kubernetes API to be redundant
+
+By default talos endpoint points to an IP (usually the first control plane node). This creates a single point of failure.
+Talos suggest many [ways](https://www.talos.dev/v1.9/introduction/prodnotes/#control-plane-nodes) to make the endpoint fault tolerant.
+
+
+My approach was to use DNS entries. 
+
+In my DNS server I defined:
+
+Name:	mycluster.local
+Address: IP_MASTERNODE_1
+Name:	mycluster.local
+Address: IP_MASTERNODE_2
+Name:	mycluster.local
+Address: IP_MASTERNODE_3
+
+Afterwards I changed certSANS in the code. Once I applied all changes I did:
+
+```
+talosctl config endpoint mycluster.local
+```
+
+Since I added the certSANS also on API server I changed my .kube/config to also have it's endpoint pointing to the same URL
+
 # About clusters
 
 Information about each cluster is inside its folder

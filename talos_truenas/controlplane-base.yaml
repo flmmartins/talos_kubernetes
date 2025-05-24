@@ -3,7 +3,8 @@ debug: false
 persist: true
 machine:
     type: controlplane
-    certSANs: []
+    certSANs:
+    - talos.tamrieltower.local
     kubelet:
         image: ghcr.io/siderolabs/kubelet:v1.32.3
         defaultRuntimeSeccompProfileEnabled: true
@@ -30,7 +31,6 @@ machine:
         node.kubernetes.io/exclude-from-external-load-balancers: ""
 cluster:
     clusterName: talos_truenas
-    allowSchedulingOnControlPlanes: true
     # # required by metric-server
     extraManifests:
     - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/main/deploy/standalone-install.yaml
@@ -40,6 +40,7 @@ cluster:
             - 10.244.0.0/16
         serviceSubnets:
             - 10.96.0.0/12
+    allowSchedulingOnControlPlanes: true
     apiServer:
         image: registry.k8s.io/kube-apiserver:v1.32.3
         disablePodSecurityPolicy: true
@@ -65,6 +66,8 @@ cluster:
             kind: Policy
             rules:
                 - level: Metadata
+        certSANs:
+        - talos.tamrieltower.local
     controllerManager:
         image: registry.k8s.io/kube-controller-manager:v1.32.3
     proxy:
