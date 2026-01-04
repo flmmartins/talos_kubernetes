@@ -2,45 +2,10 @@
 
 This repository configure kubernetes cluster by using Talos. Each folder in this repo has configurations for a given cluster. For example, folder talos_truenas contain configurations for a cluster named talos_truenas. Hopefuly in the future talos can be used for multiple platforms and more folders will be created here.
 
-# Setup
 
+# Troubleshootings and useful debugging commands
 
-## Install talos cli
-
-```
-brew install talosctl
-brew install siderolabs/tap/talosctl
-```
-
-## Download and install talosconfig
-
-Download talosconfig from vault and run:
-
-```
-talosctl kubeconfig --nodes <IP> --endpoints <IP> --talosconfig=./talosconfig
-```
-
-
-Talos has a similar concept of a kubeconfig, you can store the talos config globaly in your ~/.talos folder so you don't have to use it in every command from this readme:
-
-```
-talosctl config merge ./talosconfig
-```
-
-Test again using the talos config from your local folder:
-
-```
-talosctl -n <IP> health
-```
-
-You can add nodes to the config file so you don't have to always keep doing -n. You can do this by:
-
-```
-talosctl config node IP1 IP2
-```
-
-# Useful debugging commands
-
+## Commands
 Health checks:
 ```
 talosctl -n <IP> health
@@ -70,14 +35,43 @@ Logs of system containers (you must select the second one from the above output)
 talosctl -n <IP> logs -k kube-system/....
 ````
 
-
-# Get current configuration
+Get current configuration
 
 ```
 talosctl get machineconfig -n <IP> -o yaml
 ```
 
-# Change configuration
+## Can't use talosctl - connection refused
+
+Remember to restart your laptop if talosctl stops working with connection refused. This can happen if you change your talosconfig for some reason
+
+## Unexpected nodes with IPs
+
+When you run health command you might get the error unexpected nodes with IPs <IP>
+To solve this, list the etcd members: `talosctl etcd members` 
+
+It should least unique combination of lines. For example if your cluster has 3 nodes since they communicate with each other you should see 9 lines:
+
+node1 peer node1
+node1 peer node2
+node1 peer node3
+node2 peer node1
+node2 peer node2
+node2 peer node3
+
+If there's more than expected you can do: `talosctl etcd remove-member ID`
+
+If everything is correct that means it's a problem with your talosconfig. Maybe not all ips in the endpoint or node section
+
+If everything is correct with your talosconfig do `kubectl get nodes` and delete weird stale nodes that might be there
+
+## Need to login to kubernetes
+
+If you do a kubectl command it might ask you to login again if you don't login for a while.
+
+Do a talosctl health command. If everything is okey do `talosctl kubeconfig -n IP` to refresh your credentials
+
+# Change or update cluster configuration
 
 When you create a talos cluster you generate several files with `talosctl gen config`. All the files contain sensitive information and therefore they were not added to this repository. Below is a list and how they can be obtained
 
@@ -92,6 +86,8 @@ You can change a cluster in many ways but the best way for me is to change a fil
 
 Edit these base file with your changes. Now backup your old configuration with:
 
+## Backup old configurations
+
 ```
 talosctl gen config \
 --with-secrets secrets.yaml \
@@ -101,7 +97,8 @@ talosctl gen config \
 --t <type_of_change> > backup.yaml 
 ```
 
-Now generate new config with your changes:
+## Generate new config 
+Now generate new config with your changes. This will take the base yaml and merge with your current config
 ```
 talosctl gen config \
 --with-secrets secrets.yaml \
@@ -109,7 +106,7 @@ talosctl gen config \
 --with-examples=false \
 <cluster_name> https://CONTROL_PLANE_IP:6443 \
 --t <type_of_change> \
---config-patch @controlplane-base.yaml 
+--config-patch @NEW-BASE_TYPE-base.yaml 
 ```
 
 Where type is worker, controlplane, talosconfig. If you set -t controplane it will generate you a controlplane.yaml for example. 
@@ -128,6 +125,19 @@ talosctl apply-config -n <IP> --file controlplane.yaml
 There's also a mode flag which allows you to say if node can restart or not
 
 **Important:** Gen config command is not perfect. Sometimes after running it you will see duplicated entries and that will be bad for your cluster.
+
+## Generating vanila configuration without changes
+
+When you create a talos cluster you generate several files with `talosctl gen config` and then you apply them to nodes. If you need to re-generate this same files without changes:
+
+```
+talosctl gen config \
+   --with-secrets secrets.yaml \
+   --with-docs=false \
+   --with-examples=false \
+   <cluster_name> https://<IP>:6443
+```
+
 
 # Upgrades
 
@@ -162,7 +172,7 @@ talos_truenas https://CONTROL_PLANE_IP:6443
 
 Compare controlplane.yaml, worker.yaml, talosconfig files against base to see if something changed. Versions are expected to change and those should be updated at least. On talosconfig it was observed that certificate changed so you can do `talosctl config merge ./talosconfig`
 
-# Upgrade Kubernetes
+## Upgrade Kubernetes
 
 Check Talos and Kubernetes version compatibility.
 
@@ -254,20 +264,42 @@ cluster:
 `talosctl -n IP.of.node.to.remove reset`
 `kubectl delete node`
 
-# Generating vanila configuration without changes
 
-When you create a talos cluster you generate several files with `talosctl gen config` and then you apply them to nodes. If you need to re-generate this same files without changes:
+# Configuring talos and creating cluster from scratch
+
+## Install talos cli
 
 ```
-talosctl gen config \
-   --with-secrets secrets.yaml \
-   --with-docs=false \
-   --with-examples=false \
-   <cluster_name> https://<IP>:6443
+brew install talosctl
+brew install siderolabs/tap/talosctl
+```
+
+## Download and install talosconfig
+
+Download talosconfig from vault and run:
+
+```
+talosctl kubeconfig --nodes <IP> --endpoints <IP> --talosconfig=./talosconfig
 ```
 
 
-# Configuring a cluster from scratch
+Talos has a similar concept of a kubeconfig, you can store the talos config globaly in your ~/.talos folder so you don't have to use it in every command from this readme:
+
+```
+talosctl config merge ./talosconfig
+```
+
+Test again using the talos config from your local folder:
+
+```
+talosctl -n <IP> health
+```
+
+You can add nodes to the config file so you don't have to always keep doing -n. You can do this by:
+
+```
+talosctl config node IP1 IP2
+```
 
 ## First Control Plane
 
