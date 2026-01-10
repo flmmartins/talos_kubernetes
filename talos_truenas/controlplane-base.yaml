@@ -14,11 +14,11 @@ machine:
     network: {}
     install:
         disk: /dev/sda
-        image: ghcr.io/siderolabs/installer:v1.9.5
+        image: ghcr.io/siderolabs/installer:v1.12.1
         wipe: false
+        grubUseUKICmdline: true
     features:
         rbac: true
-        stableHostname: true
         apidCheckExtKeyUsage: true
         diskQuotaSupport: true
         kubePrism:
@@ -80,3 +80,8 @@ cluster:
             kubernetes:
                 disabled: true
             service: {}
+#---
+#apiVersion: v1alpha1
+#kind: HostnameConfig
+#auto: off
+#hostname: <HOSTNAME>

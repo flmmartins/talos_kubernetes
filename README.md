@@ -23,6 +23,10 @@ Logs for a service:
 talosctl -n <IP> logs <service>
 ```
 
+```
+talosctl -n <IP> mesg
+```
+
 Check system containers:
 
 ```
@@ -45,8 +49,22 @@ talosctl get machineconfig -n <IP> -o yaml
 
 Remember to restart your laptop if talosctl stops working with connection refused. This can happen if you change your talosconfig for some reason
 
-## Unexpected nodes with IPs
+## The hostname problem
 
+TLDR: Nodes boot but they don't obey DHCP which leads then to getting the wrong hostname and duplicating nodes on boot. This has a lot of impact on etcd and node list. This is also a problem during upgrades. In the end hostname configuration ended-up being manual by using the block below. Only off should suffice but on v1.12 there's an error so we define the hostname.
+
+
+**Possible Fix**
+```
+
+apiVersion: v1alpha1
+kind: HostnameConfig
+auto: off
+hostname: <HOSTNAME>
+```
+
+
+**Full explanation**
 When you run health command you might get the error unexpected nodes with IPs <IP>
 To solve this, list the etcd members: `talosctl etcd members` 
 
@@ -155,6 +173,18 @@ brew upgrade talosctl
 ```
 talosctl upgrade --nodes NODE_IP --image ghcr.io/siderolabs/installer:v1.9.5
 ```
+
+If this does not run correctly you can try to do a gen config from another node and just change the talos version. PS: Because you will have a new version of talos it might bump kubernetes version too when you run gen config.
+
+Once you do that you can apply just like when joining a new node.
+
+```
+talosctl apply-config -n <IP> --insecure -f controlplane.yaml
+```
+
+If node is for long time waiting for etcd to be up and stuck in Preparing Phase make sure to list the etcd members using a healthy node: `talosctl etcd members -n IP` . If you see a node with NODE=SAME_IP try delete this entry by doing `talosctl etcd remove-member` 
+
+If even that doesn't work. Start from scratch, delete disk and reprovision. Be on the look out for the hostname issue from troubleshooting section
 
 It might be that one pod will get stuck during the node drain prologing the upgrade, you can enter and check.
 
