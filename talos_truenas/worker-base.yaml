@@ -5,7 +5,7 @@ machine:
     type: worker
     certSANs: []
     kubelet:
-        image: ghcr.io/siderolabs/kubelet:v1.32.3
+        image: ghcr.io/siderolabs/kubelet:v1.35.0
         defaultRuntimeSeccompProfileEnabled: true
         disableManifestsDirectory: true
         extraArgs:
@@ -13,11 +13,11 @@ machine:
     network: {}
     install:
         disk: /dev/sda
-        image: ghcr.io/siderolabs/installer:v1.9.5
+        image: ghcr.io/siderolabs/installer:v1.12.1
         wipe: false
+        grubUseUKICmdline: true
     features:
         rbac: true
-        stableHostname: true
         apidCheckExtKeyUsage: true
         diskQuotaSupport: true
         kubePrism:
