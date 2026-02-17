@@ -29,6 +29,7 @@ machine:
             forwardKubeDNSToHost: true
     nodeLabels:
         node.kubernetes.io/exclude-from-external-load-balancers: ""
+        node-role.kubernetes.io/control-plane: ""
 cluster:
     clusterName: talos_truenas
     # required by metric-server
