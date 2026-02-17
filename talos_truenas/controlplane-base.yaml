@@ -13,7 +13,7 @@ machine:
           rotate-server-certificates: true # required by metric-server
     network: {}
     install:
-        disk: /dev/sda
+        disk: /dev/vda
         image: ghcr.io/siderolabs/installer:v1.12.2
         wipe: false
         grubUseUKICmdline: true
