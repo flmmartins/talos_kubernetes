@@ -8,6 +8,9 @@ machine:
         image: ghcr.io/siderolabs/kubelet:v1.35.0
         extraArgs:
           rotate-server-certificates: "true"
+          system-reserved: memory=512Mi
+          kube-reserved: memory=256Mi
+          eviction-hard: memory.available<300Mi
         defaultRuntimeSeccompProfileEnabled: true
         disableManifestsDirectory: true
     network: {}
