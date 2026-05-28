@@ -7,7 +7,7 @@ machine:
     kubelet:
         image: ghcr.io/siderolabs/kubelet:v1.35.0
         extraArgs:
-          rotate-server-certificates: "true"
+          rotate-server-certificates: "true" # required by metric-server - the kubelet-cert-approver is installed separately from talos
           system-reserved: memory=512Mi
           kube-reserved: memory=256Mi
           eviction-hard: memory.available<300Mi
@@ -43,9 +43,6 @@ cluster:
             kubernetes:
                 disabled: true
             service: {}
-    # required by metric-server
-    extraManifests:
-      - https://raw.githubusercontent.com/alex1989hu/kubelet-serving-cert-approver/v0.10.3/deploy/standalone-install.yaml
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
